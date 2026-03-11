@@ -24,9 +24,10 @@ openclaw plugins install ./extensions/serverchan-bot
 
 ## 获取 Bot Token
 
-1. 访问 [Server酱³ 控制台](https://sc3.ft07.com/bot) 登录账号
-2. 创建一个新的 Bot 或使用已有的 Bot
-3. 复制 Bot Token 和 UID (作为 chat_id )
+1. 访问 [Server酱³ 控制台](https://sc3.ft07.com/) 登录账号
+2. 在 sendkey 页面下方可以找到 UID, 这就是你的 chatId
+2. 在 APP 中创建一个新的 Bot 或使用已有的 Bot
+3. 复制 Bot Token 
 
 ## 配置
 
@@ -46,6 +47,7 @@ openclaw plugins install ./extensions/serverchan-bot
   },
 }
 ```
+
 
 
 ### 完整配置选项
@@ -86,6 +88,22 @@ openclaw plugins install ./extensions/serverchan-bot
     },
   },
 }
+```
+
+### 使用场景说明
+
+| 场景 | chat_id 来源 | 说明 |
+|------|-------------|------|
+| **双向对话** | 自动获取 | 用户先发消息，AI 回复时自动使用入站消息的 chat_id |
+| **主动推送** | 配置文件 | OpenClaw 主动推送通知，必须配置 chat_id |
+
+
+### 使用环境变量
+
+也可以通过环境变量配置 Bot Token：
+
+```bash
+export SERVERCHAN_BOT_TOKEN="your-bot-token-here"
 ```
 
 ## 使用方法

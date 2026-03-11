@@ -18,7 +18,15 @@ const plugin = {
     register(api: OpenClawPluginApi) {
         setServerChanBotRuntime(api.runtime);
         api.registerChannel({ plugin: serverChanBotPlugin });
-        api.registerHttpHandler(handleServerChanBotWebhookRequest);
+        
+        // Register webhook handler using the new API (OpenClaw 2026.3+)
+        // The handler will only be activated when webhook is configured in channel config
+        api.registerPluginHttpRoute({
+            path: "/serverchan-bot",
+            handler: handleServerChanBotWebhookRequest,
+            auth: "plugin",
+            match: "prefix",
+        });
     },
 };
 

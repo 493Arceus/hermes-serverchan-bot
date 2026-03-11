@@ -6,6 +6,47 @@
     "configSchema": {
         "type": "object",
         "additionalProperties": false,
-        "properties": {}
+        "properties": {
+            "botToken": {
+                "type": "string",
+                "description": "Server酱³ Bot Token"
+            },
+            "chatId": {
+                "type": "string",
+                "description": "Target user ID (UID)"
+            },
+            "dmPolicy": {
+                "type": "string",
+                "enum": ["pairing", "allowlist", "open", "disabled"],
+                "description": "Direct message policy"
+            },
+            "allowFrom": {
+                "type": "array",
+                "items": {
+                    "type": ["string", "number"]
+                },
+                "description": "Allowed user IDs"
+            },
+            "pollingEnabled": {
+                "type": "boolean",
+                "description": "Enable polling for updates"
+            },
+            "pollingIntervalMs": {
+                "type": "number",
+                "description": "Polling interval in milliseconds"
+            },
+            "webhookUrl": {
+                "type": "string",
+                "description": "Custom webhook URL"
+            },
+            "webhookSecret": {
+                "type": "string",
+                "description": "Webhook secret"
+            },
+            "webhookPath": {
+                "type": "string",
+                "description": "Custom webhook path"
+            }
+        }
     }
 }
