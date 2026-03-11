@@ -1,6 +1,6 @@
 {
     "name": "openclaw-serverchan-bot",
-    "version": "2026.2.6",
+    "version": "2026.3.11",
     "description": "OpenClaw Server酱³ Bot channel plugin",
     "license": "MIT",
     "type": "module",
