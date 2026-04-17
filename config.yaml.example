@@ -1,0 +1,9 @@
+enabled: true
+polling_enabled: true
+polling_interval_ms: 3000
+poll_timeout_seconds: 20
+default_chat_id: ""
+parse_mode: "markdown"
+silent: false
+metadata_prefix: "[[serverchan-bot"
+chunk_size: 1800
