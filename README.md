@@ -37,20 +37,20 @@ hermes plugins install file:///absolute/path/to/serverchan-hermes-plugin
 ~/.hermes/plugins/serverchan-hermes-plugin/
 ```
 
-## CLI 命令
+## 管理方式
 
-```bash
-hermes serverchan-bot status
-hermes serverchan-bot test
-hermes serverchan-bot start
-hermes serverchan-bot stop
-hermes serverchan-bot send --text '你好' --chat-id 123456
-```
+当前 Hermes 版本里，这个插件已经成功注册了：
+- 插件工具：`serverchan_send_message` / `serverchan_get_updates` / `serverchan_bot_status`
+- 会话内命令：`/serverchan ...`
 
-## 会话内命令
+说明：插件内部也注册了 `serverchan-bot` CLI 子命令，但这台机器上的 Hermes 版本尚未把“通用插件 CLI 命令”真正挂到顶层 `hermes ...` argparse 命令树，所以 `hermes serverchan-bot ...` 现在还不能直接调用。
+
+因此当前可用控制方式是：
 
 ```text
 /serverchan status
 /serverchan start
 /serverchan stop
 ```
+
+以及让 Hermes 在会话中调用对应插件工具。
