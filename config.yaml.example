@@ -1,7 +1,12 @@
 enabled: true
 polling_enabled: true
-polling_interval_ms: 3000
 poll_timeout_seconds: 20
+polling_interval_ms: 3000
+# OpenClaw-like inbound policy: open | allowlist | disabled
+dm_policy: "open"
+# When dm_policy=allowlist, only these IDs may inject into Hermes
+allow_from: []
+# Default outbound target for proactive messages
 default_chat_id: ""
 parse_mode: "markdown"
 silent: false

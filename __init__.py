@@ -31,6 +31,8 @@ _DEFAULT_CONFIG = {
     "polling_enabled": True,
     "polling_interval_ms": 3000,
     "poll_timeout_seconds": 20,
+    "dm_policy": "open",
+    "allow_from": [],
     "default_chat_id": "",
     "parse_mode": "markdown",
     "silent": False,
@@ -162,6 +164,22 @@ def _default_chat_id() -> str:
     return _LAST_ACTIVE_CHAT_ID or ""
 
 
+def _normalize_allow_entry(value: Any) -> str:
+    return str(value).strip().lower()
+
+
+def _is_allowed_sender(chat_id: str) -> bool:
+    cfg = _load_config()
+    policy = str(cfg.get("dm_policy") or "open").strip().lower()
+    if policy == "disabled":
+        return False
+    if policy == "open":
+        return True
+    allow_from = cfg.get("allow_from") or []
+    normalized = {_normalize_allow_entry(v) for v in allow_from}
+    return "*" in normalized or _normalize_allow_entry(chat_id) in normalized
+
+
 def _chunk_text(text: str, chunk_size: int) -> list[str]:
     clean = (text or "").strip()
     if not clean:
@@ -256,6 +274,10 @@ def _handle_update(ctx, update: dict) -> bool:
     if inbound is None:
         return False
 
+    if not _is_allowed_sender(inbound.chat_id):
+        logger.info("serverchan-bot ignored inbound message from disallowed chat %s", inbound.chat_id)
+        return False
+
     injected = ctx.inject_message(inbound.injected_message, role="user")
     if not injected:
         logger.warning("serverchan-bot could not inject message; CLI reference unavailable")
@@ -298,6 +320,8 @@ def _current_status() -> dict:
         "polling_enabled": bool(cfg.get("polling_enabled", True)),
         "poller_alive": poller_alive,
         "last_error": getattr(_POLLER, "last_error", None) if _POLLER else None,
+        "dm_policy": str(cfg.get("dm_policy") or "open"),
+        "allow_from": list(cfg.get("allow_from") or []),
         "default_chat_id": str(cfg.get("default_chat_id") or ""),
         "last_active_chat_id": _LAST_ACTIVE_CHAT_ID,
         "last_update_id": state.get("last_update_id"),
@@ -317,6 +341,8 @@ def _status_text() -> str:
         f"- polling_enabled: {s['polling_enabled']}\n"
         f"- poller_alive: {s['poller_alive']}\n"
         f"- token_configured: {s['token_configured']}\n"
+        f"- dm_policy: {s['dm_policy']}\n"
+        f"- allow_from: {s['allow_from'] or '-'}\n"
         f"- default_chat_id: {s['default_chat_id'] or '-'}\n"
         f"- last_active_chat_id: {s['last_active_chat_id'] or '-'}\n"
         f"- last_update_id: {s['last_update_id']}\n"

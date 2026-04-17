@@ -6,6 +6,7 @@
 - 轮询 `getUpdates`
 - 将入站消息注入当前 Hermes CLI 会话
 - Hermes 生成回复后自动回发到对应 chat_id
+- 支持接近 OpenClaw 原插件思路的 `dm_policy` / `allow_from`
 - 提供 `serverchan_*` 工具
 - 提供 `hermes serverchan-bot ...` 管理命令
 - 提供 `/serverchan ...` 会话内命令
