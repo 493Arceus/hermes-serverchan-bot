@@ -1,7 +1,7 @@
 name: serverchan-bot
 version: 0.1.0
 description: "Server酱³ Bot bridge for Hermes CLI — poll inbound messages, inject them into the active CLI session, and send replies back."
-author: Hermes Agent
+author: sup_hermes_agent via GPT-5.4
 provides_tools:
   - serverchan_send_message
   - serverchan_get_updates
@@ -13,6 +13,9 @@ provides_hooks:
   - on_session_end
 requires_env:
   - name: SERVERCHAN_BOT_TOKEN
-    description: "Server酱³ Bot Token"
+    description: "Server酱³ Bot Token (get yours at https://sc3.ft07.com/)"
     url: "https://sc3.ft07.com/"
     secret: true
+  - name: SERVERCHAN_API_BASE_URL
+    description: "Custom API base URL (optional, defaults to https://bot-go.apijia.cn)"
+    secret: false

@@ -48,13 +48,13 @@ class PluginTests(unittest.TestCase):
         self.assertTrue(payload["ok"])
 
     def test_allowlist_policy_blocks_unknown_sender(self):
-        with patch.object(mod, "_load_config", return_value={**mod._DEFAULT_CONFIG, "dm_policy": "allowlist", "allow_from": ["716"]}):
-            self.assertTrue(mod._is_allowed_sender("716"))
-            self.assertFalse(mod._is_allowed_sender("999"))
+        with patch.object(mod, "_load_config", return_value={**mod._DEFAULT_CONFIG, "dm_policy": "allowlist", "allow_from": ["12345"]}):
+            self.assertTrue(mod._is_allowed_sender("12345"))
+            self.assertFalse(mod._is_allowed_sender("99999"))
 
     def test_disabled_policy_blocks_sender(self):
         with patch.object(mod, "_load_config", return_value={**mod._DEFAULT_CONFIG, "dm_policy": "disabled"}):
-            self.assertFalse(mod._is_allowed_sender("716"))
+            self.assertFalse(mod._is_allowed_sender("12345"))
 
     def test_state_roundtrip(self):
         with tempfile.TemporaryDirectory() as td:

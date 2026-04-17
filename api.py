@@ -1,12 +1,22 @@
 from __future__ import annotations
 
 import json
+import os
 import urllib.error
 import urllib.parse
 import urllib.request
 from typing import Any, Dict, Optional
 
-API_BASE_URL = "https://bot-go.apijia.cn"
+DEFAULT_API_BASE_URL = "https://bot-go.apijia.cn"
+
+
+def _get_api_base_url() -> str:
+    """Return the Server酱³ Bot API base URL.
+
+    Override via the ``SERVERCHAN_API_BASE_URL`` environment variable
+    if you use a self-hosted or regional endpoint.
+    """
+    return os.getenv("SERVERCHAN_API_BASE_URL", DEFAULT_API_BASE_URL).rstrip("/")
 
 
 def _json_request(url: str, method: str = "GET", body: Optional[dict] = None) -> Dict[str, Any]:
@@ -33,7 +43,7 @@ def _json_request(url: str, method: str = "GET", body: Optional[dict] = None) ->
 
 
 def get_me(token: str) -> Dict[str, Any]:
-    return _json_request(f"{API_BASE_URL}/bot{token}/getMe")
+    return _json_request(f"{_get_api_base_url()}/bot{token}/getMe")
 
 
 def send_message(
@@ -51,7 +61,7 @@ def send_message(
         body["parse_mode"] = parse_mode
     if silent is not None:
         body["silent"] = silent
-    return _json_request(f"{API_BASE_URL}/bot{token}/sendMessage", method="POST", body=body)
+    return _json_request(f"{_get_api_base_url()}/bot{token}/sendMessage", method="POST", body=body)
 
 
 def send_chat_action(token: str, chat_id: str | int, action: str = "typing") -> Dict[str, Any]:
@@ -59,7 +69,7 @@ def send_chat_action(token: str, chat_id: str | int, action: str = "typing") -> 
         "chat_id": int(chat_id) if str(chat_id).strip().lstrip("-").isdigit() else chat_id,
         "action": action,
     }
-    return _json_request(f"{API_BASE_URL}/bot{token}/sendChatAction", method="POST", body=body)
+    return _json_request(f"{_get_api_base_url()}/bot{token}/sendChatAction", method="POST", body=body)
 
 
 def get_updates(token: str, offset: Optional[int] = None, timeout: Optional[int] = None) -> Dict[str, Any]:
@@ -69,7 +79,7 @@ def get_updates(token: str, offset: Optional[int] = None, timeout: Optional[int]
     if timeout is not None:
         params["timeout"] = str(timeout)
     qs = urllib.parse.urlencode(params)
-    url = f"{API_BASE_URL}/bot{token}/getUpdates"
+    url = f"{_get_api_base_url()}/bot{token}/getUpdates"
     if qs:
         url = f"{url}?{qs}"
     return _json_request(url)
