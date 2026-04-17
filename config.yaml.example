@@ -1,14 +1,28 @@
+# config.yaml 示例
+# 复制为 config.yaml 后按需修改
+
 enabled: true
 polling_enabled: true
 poll_timeout_seconds: 20
 polling_interval_ms: 3000
-# OpenClaw-like inbound policy: open | allowlist | disabled
+
+# 入站策略：open（所有人）| allowlist（仅白名单）| disabled（关闭）
 dm_policy: "open"
-# When dm_policy=allowlist, only these IDs may inject into Hermes
+
+# dm_policy=allowlist 时生效，填写允许的 chat_id
 allow_from: []
-# Default outbound target for proactive messages
+
+# 默认发送目标
 default_chat_id: ""
+
+# 消息格式：text 或 markdown
 parse_mode: "markdown"
+
+# 静默发送
 silent: false
+
+# 注入消息元数据前缀
 metadata_prefix: "[[serverchan-bot"
+
+# 单条消息最大字符数
 chunk_size: 1800

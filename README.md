@@ -1,56 +1,44 @@
-# serverchan-bot — Server酱³ Bot Bridge for Hermes
+# serverchan-bot Hermes 插件
 
-A [Hermes](https://github.com/NousResearch/hermes-agent) general plugin that bridges
-[Server酱³](https://sc3.ft07.com/) Bot messages into your Hermes CLI session.
+把 Server酱³ Bot 接到 Hermes CLI。
 
-Poll inbound messages from Server酱³ Bot, inject them into the active CLI session as
-user turns, and automatically send the assistant's reply back to the originating chat.
+由 sup_hermes_agent via GPT-5.4 编写。
 
-> Written by **sup_hermes_agent** via **GPT-5.4**
+## 干什么的
 
-## Features
+- 后台轮询 `getUpdates`，收到消息后注入当前 Hermes CLI 会话
+- Hermes 回复完成后自动发回对应 chat_id
+- 支持 `dm_policy` / `allow_from` 访问控制（思路同 OpenClaw 原插件）
+- 提供 `serverchan_send_message` / `serverchan_get_updates` / `serverchan_bot_status` 三个工具
+- 提供 `/serverchan status|start|stop` 会话内命令
+- 长消息自动按段落分片发送
 
-- **Inbound polling** — long-polls `getUpdates` in a background thread
-- **Seamless injection** — inbound messages appear as regular user turns in the CLI
-- **Auto-reply** — the assistant's final response is sent back to the originating chat
-- **Access control** — `dm_policy` supports `open`, `allowlist`, and `disabled` modes
-- **Proactive messaging** — use the `serverchan_send_message` tool to push messages anytime
-- **Smart chunking** — long replies are automatically split at paragraph boundaries
-- **Slash commands** — `/serverchan status|start|stop` for quick control
+## 限制
 
-## Requirements
+- 只支持 Hermes CLI 模式
+- Gateway 模式下没有可用的 `inject_message()`，所以不支持把消息注入 Telegram/Discord 等 gateway 会话
 
-- Hermes Agent (tested with v0.8+)
-- Python 3.11+
-- A Server酱³ Bot Token
-
-## Installation
+## 安装
 
 ```bash
-hermes plugins install https://github.com/493Arceus/hermes-plugin-serverchan-bot.git
+hermes plugins install https://github.com/493Arceus/hermes-serverchan-bot.git
 ```
 
-Or install from a local clone:
+本地测试：
 
 ```bash
-git clone https://github.com/493Arceus/hermes-plugin-serverchan-bot.git
-hermes plugins install file:///absolute/path/to/hermes-plugin-serverchan-bot
+hermes plugins install file:///path/to/hermes-serverchan-bot
 ```
 
-## Configuration
+## 配置
 
-### 1. Set the Bot Token
-
-Add your Server酱³ Bot Token to `~/.hermes/.env`:
+1. 在 `~/.hermes/.env` 里加上：
 
 ```bash
-SERVERCHAN_BOT_TOKEN=your_bot_token_here
+SERVERCHAN_BOT_TOKEN=你的bot_token
 ```
 
-### 2. Edit Plugin Config (Optional)
-
-After installation, edit the plugin's `config.yaml` (usually at
-`~/.hermes/plugins/serverchan-bot/config.yaml`):
+2. 安装后编辑插件目录下的 `config.yaml`（默认在 `~/.hermes/plugins/serverchan-bot/`）：
 
 ```yaml
 enabled: true
@@ -58,92 +46,69 @@ polling_enabled: true
 poll_timeout_seconds: 20
 polling_interval_ms: 3000
 
-# Inbound message policy: open | allowlist | disabled
+# 入站策略：open | allowlist | disabled
 dm_policy: "open"
 
-# When dm_policy=allowlist, only these chat IDs may inject messages
+# dm_policy=allowlist 时，只允许这些 chat_id 注入
 allow_from: []
 
-# Default outbound target for proactive messages
+# 默认发送目标（主动发消息时用）
 default_chat_id: ""
 
-# Message formatting: text or markdown
+# 消息格式：text 或 markdown
 parse_mode: "markdown"
 
-# Send messages silently (no notification)
+# 静默发送（不触发通知）
 silent: false
 
-# Prefix for injected message metadata
+# 注入消息的元数据前缀
 metadata_prefix: "[[serverchan-bot"
 
-# Max characters per message chunk
+# 单条消息最大字符数
 chunk_size: 1800
 ```
 
-### 3. Custom API Endpoint (Optional)
-
-If you use a self-hosted or regional Server酱³ endpoint, set the
-`SERVERCHAN_API_BASE_URL` environment variable:
+3. 如果你的 Server酱³ 用的是自定义 API 地址，设一下环境变量：
 
 ```bash
-SERVERCHAN_API_BASE_URL=https://your-custom-endpoint.example.com
+SERVERCHAN_API_BASE_URL=https://你的自定义地址
 ```
 
-The default is `https://bot-go.apijia.cn`.
+默认是 `https://bot-go.apijia.cn`，不设也能用。
 
-### 4. Restart
+4. 重启 Hermes 或开个新会话。
 
-Restart Hermes or start a new CLI session for the plugin to load.
+## 使用
 
-## Usage
-
-### Slash Commands (In-Session)
+会话内命令：
 
 ```
-/serverchan status    # Show bridge status
-/serverchan start     # Start the background poller
-/serverchan stop      # Stop the background poller
+/serverchan status    # 看状态
+/serverchan start     # 启动轮询
+/serverchan stop      # 停止轮询
 ```
 
-### Plugin Tools
+插件工具（Hermes 会话中可以直接调用）：
 
-Hermes can use these tools during a session:
+| 工具 | 干什么 |
+|------|--------|
+| `serverchan_send_message` | 主动发消息 |
+| `serverchan_get_updates` | 拉取最新消息 |
+| `serverchan_bot_status` | 看桥接状态 |
 
-| Tool | Description |
-|------|-------------|
-| `serverchan_send_message` | Send a message to a Server酱³ chat |
-| `serverchan_get_updates` | Fetch recent inbound updates |
-| `serverchan_bot_status` | Show bridge status and config |
+## 原理
 
-### How It Works
+1. 会话启动时开一个后台线程轮询 `getUpdates`
+2. 收到消息后拼上元数据前缀，通过 `ctx.inject_message()` 注入当前会话
+3. `pre_llm_call` 识别注入消息，告诉模型忽略元数据正常回复
+4. `post_llm_call` 把模型回复发回原 chat_id
 
-1. On session start, the plugin launches a background poller thread
-2. The poller calls `getUpdates` with long-polling (default 20s timeout)
-3. When an inbound message arrives, it's injected into the CLI session with metadata
-4. In `pre_llm_call`, the plugin recognizes the injected message and adds context
-5. After `post_llm_call`, the assistant's response is sent back to the originating chat
-
-## Limitations
-
-- **CLI mode only** — `ctx.inject_message()` is not available in gateway mode, so this
-  plugin only works when Hermes is running as a CLI session
-- The `hermes serverchan-bot ...` CLI subcommand is registered but may not appear in the
-  top-level `hermes` command tree in some Hermes versions — use `/serverchan` or plugin
-  tools instead
-
-## Development
-
-Run tests:
+## 测试
 
 ```bash
-cd hermes-plugin-serverchan-bot
-python3 -m pytest tests/ -v
+python3 -m unittest tests.test_plugin -v
 ```
 
-## License
+## 许可
 
 MIT
-
-## Author
-
-Written by **sup_hermes_agent** via **GPT-5.4**
