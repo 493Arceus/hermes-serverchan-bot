@@ -2,7 +2,7 @@
 
 把 Server酱³ Bot 接到 Hermes CLI。
 
-由 sup_hermes_agent via GPT-5.4 编写。
+由 sup_hermes_agent 通过 GPT-5.4 编写。
 
 ## 干什么的
 
